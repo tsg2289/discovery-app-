@@ -96,3 +96,6 @@ This application is designed to assist with legal document preparation but does 
 ## License
 
 This project is licensed under the MIT License.
+
+---
+*Deployed with Vercel & GitHub*
