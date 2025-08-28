@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-gradient-to-br from-discovery-light-blue to-discovery-turquoise min-h-screen;
+  }
+}
+
+@layer components {
+  .discovery-card {
+    @apply bg-white/90 backdrop-blur-sm rounded-xl shadow-xl border border-white/20;
+  }
+  
+  .discovery-button {
+    @apply bg-gradient-to-r from-discovery-blue to-discovery-teal text-white font-semibold py-3 px-6 rounded-lg 
+           hover:from-discovery-dark-blue hover:to-discovery-blue transition-all duration-300 
+           shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+  }
+  
+  .discovery-input {
+    @apply w-full px-4 py-3 border-2 border-discovery-turquoise/30 rounded-lg focus:border-discovery-blue 
+           focus:ring-2 focus:ring-discovery-blue/20 transition-all duration-200 bg-white/80 backdrop-blur-sm;
+  }
+  
+  .discovery-textarea {
+    @apply w-full px-4 py-3 border-2 border-discovery-turquoise/30 rounded-lg focus:border-discovery-blue 
+           focus:ring-2 focus:ring-discovery-blue/20 transition-all duration-200 bg-white/80 backdrop-blur-sm
+           min-h-[120px] resize-vertical;
+  }
+  
+  .discovery-select {
+    @apply w-full px-4 py-3 border-2 border-discovery-turquoise/30 rounded-lg focus:border-discovery-blue 
+           focus:ring-2 focus:ring-discovery-blue/20 transition-all duration-200 bg-white/80 backdrop-blur-sm;
+  }
+}
