@@ -70,7 +70,7 @@ export function DocumentPreview({ content, discoveryData, isGenerating }: Docume
       console.log('Download completed successfully')
     } catch (error) {
       console.error('Error downloading document:', error)
-      alert(`Error downloading document: ${error.message}`)
+      alert(`Error downloading document: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsDownloading(false)
     }

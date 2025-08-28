@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     console.log('DOCX buffer generated, size:', buffer.length)
 
     // Return the DOCX file
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'Content-Disposition': `attachment; filename="Discovery_Request_${(discoveryData?.caseNumber || 'Document').replace(/[^a-zA-Z0-9]/g, '_')}.docx"`,
@@ -151,7 +151,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error generating DOCX:', error)
     return NextResponse.json(
-      { error: 'Failed to generate DOCX document', details: error.message },
+      { 
+        error: 'Failed to generate DOCX document', 
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
