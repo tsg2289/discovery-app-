@@ -22,10 +22,15 @@ export function DocumentPreview({ content, discoveryData, isGenerating }: Docume
   }
 
   const downloadAsWord = async () => {
-    if (!content || !discoveryData) return
+    if (!content || !discoveryData) {
+      alert('No document content available to download')
+      return
+    }
     
     setIsDownloading(true)
     try {
+      console.log('Starting download...', { content: content.substring(0, 100), discoveryData })
+      
       const response = await fetch('/api/generate-docx', {
         method: 'POST',
         headers: {
@@ -37,11 +42,22 @@ export function DocumentPreview({ content, discoveryData, isGenerating }: Docume
         }),
       })
 
+      console.log('Response status:', response.status)
+      
       if (!response.ok) {
-        throw new Error('Failed to generate Word document')
+        let errorData
+        try {
+          errorData = await response.json()
+        } catch {
+          errorData = { error: `HTTP ${response.status}: ${response.statusText}` }
+        }
+        console.error('Server error:', errorData)
+        throw new Error(`Server error: ${errorData.error || 'Unknown error'}`)
       }
 
       const blob = await response.blob()
+      console.log('Blob created:', blob.size, blob.type)
+      
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -50,9 +66,11 @@ export function DocumentPreview({ content, discoveryData, isGenerating }: Docume
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
+      
+      console.log('Download completed successfully')
     } catch (error) {
       console.error('Error downloading document:', error)
-      alert('Error downloading document. Please try again.')
+      alert(`Error downloading document: ${error.message}`)
     } finally {
       setIsDownloading(false)
     }
@@ -105,7 +123,7 @@ export function DocumentPreview({ content, discoveryData, isGenerating }: Docume
           ) : (
             <>
               <Download className="w-4 h-4" />
-              <span>Download Word Doc</span>
+              <span>Download DOCX File</span>
             </>
           )}
         </button>

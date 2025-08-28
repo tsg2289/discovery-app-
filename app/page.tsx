@@ -25,7 +25,7 @@ export default function Home() {
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Generate professional discovery requests for litigation cases with AI-powered assistance. 
-            Upload your case documents and create comprehensive discovery documents instantly.
+            Create comprehensive discovery documents instantly - with or without uploaded case documents.
           </p>
         </div>
       </div>
@@ -38,7 +38,7 @@ export default function Home() {
             <div className="flex items-center mb-4">
               <FileText className="w-6 h-6 text-discovery-blue mr-2" />
               <h2 className="text-2xl font-bold text-discovery-dark-blue">
-                Upload Case Documents
+                Upload Case Documents (Optional)
               </h2>
             </div>
             <FileUpload 

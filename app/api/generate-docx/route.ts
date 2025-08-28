@@ -1,134 +1,170 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel } from 'docx'
+import PizZip from 'pizzip'
 
 export async function POST(request: NextRequest) {
   try {
     const { content, discoveryData } = await request.json()
 
+    console.log('DOCX generation started', { 
+      contentLength: content?.length, 
+      discoveryData: discoveryData 
+    })
+
     if (!content) {
+      console.error('No content provided')
       return NextResponse.json(
         { error: 'No content provided' },
         { status: 400 }
       )
     }
 
-    // Split content into paragraphs
-    const paragraphs = content.split('\n\n').filter((p: string) => p.trim())
+    // Create a minimal DOCX file structure
+    const zip = new PizZip()
 
-    // Create document sections
-    const docSections = []
+    // Add the required DOCX structure
+    // 1. _rels/.rels
+    zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`)
 
-    // Add header information
-    docSections.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: discoveryData?.caseTitle || 'Discovery Document',
-            bold: true,
-            size: 32,
-          }),
-        ],
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 400 },
-      })
-    )
+    // 2. [Content_Types].xml
+    zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`)
 
+    // 3. word/_rels/document.xml.rels
+    zip.file('word/_rels/document.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+</Relationships>`)
+
+    // 4. word/document.xml - the main content
+    let documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>`
+
+    // Add title if exists
+    if (discoveryData?.caseTitle) {
+      documentXml += `
+<w:p>
+<w:pPr><w:jc w:val="center"/></w:pPr>
+<w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t>${escapeXml(discoveryData.caseTitle)}</w:t></w:r>
+</w:p>`
+    }
+
+    // Add case number if exists
     if (discoveryData?.caseNumber) {
-      docSections.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `Case No.: ${discoveryData.caseNumber}`,
-              size: 24,
-            }),
-          ],
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 200 },
-        })
-      )
+      documentXml += `
+<w:p>
+<w:pPr><w:jc w:val="center"/></w:pPr>
+<w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t>Case No.: ${escapeXml(discoveryData.caseNumber)}</w:t></w:r>
+</w:p>`
     }
 
+    // Add jurisdiction if exists
     if (discoveryData?.jurisdiction) {
-      docSections.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: discoveryData.jurisdiction,
-              size: 24,
-            }),
-          ],
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 400 },
-        })
-      )
+      documentXml += `
+<w:p>
+<w:pPr><w:jc w:val="center"/></w:pPr>
+<w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t>${escapeXml(discoveryData.jurisdiction)}</w:t></w:r>
+</w:p>`
     }
 
-    // Add content paragraphs
-    paragraphs.forEach((paragraph: string) => {
-      // Check if this looks like a heading
-      const isHeading = paragraph.length < 100 && 
-        (paragraph.includes('INTERROGATORIES') || 
-         paragraph.includes('REQUESTS FOR') || 
-         paragraph.includes('DEFINITIONS') ||
-         paragraph.includes('INSTRUCTIONS') ||
-         paragraph.toUpperCase() === paragraph)
+    // Add empty paragraph for spacing
+    documentXml += `<w:p><w:r><w:t></w:t></w:r></w:p>`
 
-      if (isHeading) {
-        docSections.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: paragraph,
-                bold: true,
-                size: 26,
-              }),
-            ],
-            heading: HeadingLevel.HEADING_2,
-            spacing: { before: 400, after: 200 },
-          })
+    // Process content into paragraphs
+    const paragraphs = content.split('\n\n').filter((p: string) => p.trim())
+    
+    for (const paragraph of paragraphs) {
+      if (paragraph.trim()) {
+        // Check if it's a heading (contains certain keywords or is all caps)
+        const isHeading = paragraph.length < 150 && (
+          paragraph.includes('INTERROGATOR') || 
+          paragraph.includes('REQUEST') || 
+          paragraph.includes('DEFINITION') ||
+          paragraph.includes('INSTRUCTION') ||
+          /^[A-Z\s]+$/.test(paragraph.trim()) ||
+          /^\d+\./.test(paragraph.trim())
         )
-      } else {
-        // Regular paragraph
-        docSections.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: paragraph,
-                size: 22,
-              }),
-            ],
-            spacing: { after: 200 },
-            alignment: AlignmentType.JUSTIFIED,
-          })
-        )
+
+        if (isHeading) {
+          documentXml += `
+<w:p>
+<w:r><w:rPr><w:b/><w:sz w:val="24"/></w:rPr><w:t>${escapeXml(paragraph.trim())}</w:t></w:r>
+</w:p>`
+        } else {
+          // Split long paragraphs by sentences for better formatting
+          const sentences = paragraph.split(/(?<=[.!?])\s+/)
+          let currentParagraph = ''
+          
+          for (const sentence of sentences) {
+            if (currentParagraph.length + sentence.length > 1000) {
+              // Add current paragraph and start new one
+              if (currentParagraph.trim()) {
+                documentXml += `
+<w:p>
+<w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t>${escapeXml(currentParagraph.trim())}</w:t></w:r>
+</w:p>`
+              }
+              currentParagraph = sentence
+            } else {
+              currentParagraph += (currentParagraph ? ' ' : '') + sentence
+            }
+          }
+          
+          // Add final paragraph
+          if (currentParagraph.trim()) {
+            documentXml += `
+<w:p>
+<w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t>${escapeXml(currentParagraph.trim())}</w:t></w:r>
+</w:p>`
+          }
+        }
       }
-    })
+    }
 
-    // Create the document
-    const doc = new Document({
-      sections: [
-        {
-          properties: {},
-          children: docSections,
-        },
-      ],
-    })
+    documentXml += `
+</w:body>
+</w:document>`
 
-    // Generate the document buffer
-    const buffer = await Packer.toBuffer(doc)
+    zip.file('word/document.xml', documentXml)
 
-    // Return the document as a downloadable file
+    console.log('DOCX structure created, generating buffer...')
+
+    // Generate the DOCX file
+    const buffer = zip.generate({ type: 'nodebuffer' })
+    
+    console.log('DOCX buffer generated, size:', buffer.length)
+
+    // Return the DOCX file
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Disposition': `attachment; filename="Discovery_Request_${discoveryData?.caseNumber || 'Document'}.docx"`,
+        'Content-Disposition': `attachment; filename="Discovery_Request_${(discoveryData?.caseNumber || 'Document').replace(/[^a-zA-Z0-9]/g, '_')}.docx"`,
+        'Content-Length': buffer.length.toString(),
       },
     })
   } catch (error) {
     console.error('Error generating DOCX:', error)
     return NextResponse.json(
-      { error: 'Failed to generate Word document' },
+      { error: 'Failed to generate DOCX document', details: error.message },
       { status: 500 }
     )
   }
 }
+
+// Helper function to escape XML characters
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+

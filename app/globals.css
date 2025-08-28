@@ -31,7 +31,7 @@
   .discovery-textarea {
     @apply w-full px-4 py-3 border-2 border-discovery-turquoise/30 rounded-lg focus:border-discovery-blue 
            focus:ring-2 focus:ring-discovery-blue/20 transition-all duration-200 bg-white/80 backdrop-blur-sm
-           min-h-[120px] resize-vertical;
+           min-h-[120px] resize-y;
   }
   
   .discovery-select {

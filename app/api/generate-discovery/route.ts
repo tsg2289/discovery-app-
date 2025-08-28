@@ -31,7 +31,7 @@ CASE INFORMATION:
 - Specific Requests: ${formData.specificRequests || 'General discovery'}
 - Additional Instructions: ${formData.additionalInstructions || 'Standard professional format'}
 
-UPLOADED DOCUMENTS: ${fileCount} files uploaded (${fileNames.join(', ')})
+UPLOADED DOCUMENTS: ${fileCount > 0 ? `${fileCount} files uploaded (${fileNames.join(', ')})` : 'No documents uploaded - generating based on case information only'}
 
 INSTRUCTIONS:
 1. Generate a professional ${formData.discoveryType.replace('-', ' ')} document appropriate for litigation
@@ -44,6 +44,7 @@ INSTRUCTIONS:
 8. Make requests specific enough to be enforceable but broad enough to capture relevant information
 9. If timeframe is provided, incorporate those date ranges into the requests
 10. Consider the jurisdiction's discovery rules and practices
+${fileCount > 0 ? '11. Reference the uploaded documents and create targeted requests based on their likely content' : '11. Create comprehensive discovery requests based solely on the case information and subject matter provided'}
 
 FORMAT REQUIREMENTS:
 - Use proper legal document formatting

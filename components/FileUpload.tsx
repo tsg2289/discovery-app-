@@ -103,12 +103,12 @@ export function FileUpload({ onFilesUploaded, uploadedFiles }: FileUploadProps) 
       <div className="flex items-start space-x-2 p-3 bg-blue-50 rounded-lg">
         <AlertCircle className="w-5 h-5 text-discovery-blue mt-0.5 flex-shrink-0" />
         <div className="text-sm text-discovery-dark-blue">
-          <p className="font-medium mb-1">Supported Documents:</p>
+          <p className="font-medium mb-1">Optional Document Upload:</p>
           <ul className="list-disc list-inside space-y-1 text-gray-600">
-            <li>Case files, pleadings, and court documents</li>
-            <li>Contracts, agreements, and legal correspondence</li>
-            <li>Expert reports and witness statements</li>
-            <li>Any relevant case materials for discovery analysis</li>
+            <li>Upload documents for more targeted discovery requests</li>
+            <li>Supported: Case files, pleadings, contracts, correspondence</li>
+            <li>Or generate documents using just case information</li>
+            <li>AI will create comprehensive requests either way</li>
           </ul>
         </div>
       </div>

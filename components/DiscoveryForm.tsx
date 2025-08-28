@@ -41,10 +41,6 @@ export function DiscoveryForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (uploadedFiles.length === 0) {
-      alert('Please upload at least one document before generating discovery requests.')
-      return
-    }
 
     setIsGenerating(true)
     onFormSubmit(formData)
@@ -242,7 +238,7 @@ export function DiscoveryForm({
       <div className="flex justify-center pt-4">
         <button
           type="submit"
-          disabled={isGenerating || uploadedFiles.length === 0}
+          disabled={isGenerating}
           className="discovery-button disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
         >
           {isGenerating ? (
@@ -260,11 +256,12 @@ export function DiscoveryForm({
         </button>
       </div>
 
-      {uploadedFiles.length === 0 && (
-        <p className="text-center text-sm text-red-500 mt-2">
-          Please upload at least one document to generate discovery requests
+      <div className="text-center text-sm text-discovery-blue mt-2 bg-blue-50 p-3 rounded-lg">
+        <p className="font-medium">📄 Document Upload is Optional</p>
+        <p className="text-gray-600 mt-1">
+          You can generate discovery documents with just the form information, or upload documents for more targeted requests.
         </p>
-      )}
+      </div>
     </form>
   )
 }
