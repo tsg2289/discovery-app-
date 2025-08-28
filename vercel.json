@@ -3,9 +3,7 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "env": {
-    "OPENAI_API_KEY": "@openai_api_key"
-  },
+
   "functions": {
     "app/api/generate-discovery/route.ts": {
       "maxDuration": 30
