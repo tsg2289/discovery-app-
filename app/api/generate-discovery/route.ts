@@ -9,6 +9,12 @@ export async function POST(request: NextRequest) {
   try {
     const { formData, fileCount, fileNames } = await request.json()
 
+    console.log('Environment check:', {
+      hasKey: !!process.env.OPENAI_API_KEY,
+      keyLength: process.env.OPENAI_API_KEY?.length,
+      keyPrefix: process.env.OPENAI_API_KEY?.substring(0, 10)
+    })
+
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: 'OpenAI API key not configured' },
