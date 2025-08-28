@@ -1,26 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
 export async function POST(request: NextRequest) {
   try {
     const { formData, fileCount, fileNames } = await request.json()
 
+    // Try both possible environment variable names
+    const apiKey = process.env.OPENAI_API_KEY || process.env.openai_api_key
+
     console.log('Environment check:', {
-      hasKey: !!process.env.OPENAI_API_KEY,
-      keyLength: process.env.OPENAI_API_KEY?.length,
-      keyPrefix: process.env.OPENAI_API_KEY?.substring(0, 10)
+      hasUpperKey: !!process.env.OPENAI_API_KEY,
+      hasLowerKey: !!process.env.openai_api_key,
+      finalKey: !!apiKey,
+      keyLength: apiKey?.length,
+      keyPrefix: apiKey?.substring(0, 10)
     })
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!apiKey) {
       return NextResponse.json(
         { error: 'OpenAI API key not configured' },
         { status: 500 }
       )
     }
+
+    // Initialize OpenAI with the API key
+    const openai = new OpenAI({
+      apiKey: apiKey,
+    })
 
     // Create a comprehensive prompt for ChatGPT
     const prompt = `You are a legal assistant specializing in discovery document generation for litigation cases. Based on the following case information and uploaded documents, generate a professional discovery document.
