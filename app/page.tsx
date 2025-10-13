@@ -30,7 +30,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[calc(100vh-300px)]">
         {/* Left Column - Input Section */}
         <div className="space-y-6">
           {/* File Upload Section */}
@@ -66,8 +66,8 @@ export default function Home() {
         </div>
 
         {/* Right Column - Preview Section */}
-        <div className="space-y-6">
-          <div className="discovery-card p-6">
+        <div className="flex flex-col h-full">
+          <div className="discovery-card p-6 flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
                 <Download className="w-6 h-6 text-discovery-blue mr-2" />
@@ -76,11 +76,13 @@ export default function Home() {
                 </h2>
               </div>
             </div>
-            <DocumentPreview 
-              content={generatedDocument}
-              discoveryData={discoveryData}
-              isGenerating={isGenerating}
-            />
+            <div className="flex-1">
+              <DocumentPreview 
+                content={generatedDocument}
+                discoveryData={discoveryData}
+                isGenerating={isGenerating}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -78,7 +78,7 @@ export function DocumentPreview({ content, discoveryData, isGenerating }: Docume
 
   if (isGenerating) {
     return (
-      <div className="h-96 flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-discovery-blue animate-spin mx-auto mb-4" />
           <p className="text-discovery-dark-blue font-medium">
@@ -94,7 +94,7 @@ export function DocumentPreview({ content, discoveryData, isGenerating }: Docume
 
   if (!content) {
     return (
-      <div className="h-96 flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         <div className="text-center">
           <FileText className="w-16 h-16 text-discovery-turquoise/50 mx-auto mb-4" />
           <p className="text-gray-500 mb-2">No document generated yet</p>
@@ -107,9 +107,9 @@ export function DocumentPreview({ content, discoveryData, isGenerating }: Docume
   }
 
   return (
-    <div className="space-y-4">
+    <div className="h-full flex flex-col space-y-4">
       {/* Action Buttons */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 flex-shrink-0">
         <button
           onClick={downloadAsWord}
           disabled={isDownloading}
@@ -148,16 +148,16 @@ export function DocumentPreview({ content, discoveryData, isGenerating }: Docume
         </button>
       </div>
 
-      {/* Document Preview */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-inner">
-        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 rounded-t-lg">
+      {/* Document Preview - Takes remaining space */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-inner flex-1 flex flex-col">
+        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 rounded-t-lg flex-shrink-0">
           <h3 className="font-medium text-discovery-dark-blue flex items-center">
             <FileText className="w-5 h-5 mr-2" />
             Discovery Document Preview
           </h3>
         </div>
-        <div className="p-6 max-h-96 overflow-y-auto">
-          <div className="prose prose-sm max-w-none">
+        <div className="p-6 flex-1 overflow-y-auto">
+          <div className="prose prose-sm max-w-none h-full">
             <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono leading-relaxed">
               {content}
             </pre>
@@ -167,7 +167,7 @@ export function DocumentPreview({ content, discoveryData, isGenerating }: Docume
 
       {/* Document Info */}
       {discoveryData && (
-        <div className="bg-blue-50 rounded-lg p-4">
+        <div className="bg-blue-50 rounded-lg p-4 flex-shrink-0">
           <h4 className="font-medium text-discovery-dark-blue mb-2">Document Information</h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>

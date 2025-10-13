@@ -19,16 +19,16 @@ export function DiscoveryForm({
   setIsGenerating 
 }: DiscoveryFormProps) {
   const [formData, setFormData] = useState({
-    caseTitle: '',
-    caseNumber: '',
-    requestingParty: '',
-    respondingParty: '',
+    caseTitle: 'Johnson v. MegaCorp Industries',
+    caseNumber: 'CV-2024-007892',
+    requestingParty: 'Sarah Johnson, Plaintiff',
+    respondingParty: 'MegaCorp Industries, Inc., Defendant',
     discoveryType: 'interrogatories',
-    subject: '',
-    timeframe: '',
-    specificRequests: '',
-    jurisdiction: '',
-    additionalInstructions: ''
+    subject: 'Employment discrimination and wrongful termination',
+    timeframe: 'January 2022 - Present',
+    specificRequests: 'The circumstances leading to plaintiff\'s termination including who made the decision, what factors were considered, when the decision was made, and the reasons given. The company\'s hiring and firing practices, any complaints or issues with plaintiff\'s performance, and whether proper procedures were followed.',
+    jurisdiction: 'Superior Court of California, County of Los Angeles',
+    additionalInstructions: 'Focus on establishing a pattern of discriminatory behavior and identify decision-makers and their motivations. Explore whether proper employment procedures were followed and if there was any pretext for the termination decision.'
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -204,32 +204,66 @@ export function DiscoveryForm({
         </div>
       </div>
 
-      {/* Specific Requests */}
+      {/* Specific Requests - Dynamic based on discovery type */}
       <div>
         <label className="block text-sm font-medium text-discovery-dark-blue mb-2">
-          Specific Discovery Requests
+          {formData.discoveryType === 'interrogatories' 
+            ? 'Key Facts and Circumstances to Explore'
+            : formData.discoveryType === 'document-requests'
+            ? 'Specific Documents and Records Needed'
+            : formData.discoveryType === 'admissions'
+            ? 'Facts to Admit or Deny'
+            : formData.discoveryType === 'depositions'
+            ? 'Key Facts and Topics for Deposition Testimony'
+            : 'Specific Discovery Requests'
+          }
         </label>
         <textarea
           name="specificRequests"
           value={formData.specificRequests}
           onChange={handleInputChange}
           className="discovery-textarea"
-          placeholder="Describe specific information or documents you need to discover. The AI will use this along with your uploaded documents to generate comprehensive discovery requests."
-          rows={4}
+          placeholder={
+            formData.discoveryType === 'interrogatories'
+              ? "Describe the key facts, events, and circumstances you need to explore. Focus on WHO was involved, WHAT happened, WHERE it occurred, WHEN it took place, and WHY it happened. Example: 'The circumstances leading to plaintiff's termination, who made the decision, what factors were considered, when the decision was made, and the reasons given.'"
+              : formData.discoveryType === 'document-requests'
+              ? "Describe specific documents, records, and materials you need. Include contracts, emails, reports, photos, recordings, databases, personnel files, financial records, etc. Example: 'All employment contracts, performance evaluations, disciplinary records, and communications regarding plaintiff's employment.'"
+              : formData.discoveryType === 'admissions'
+              ? "List specific facts you want the opposing party to admit or deny. Keep statements clear and specific. Example: 'That defendant terminated plaintiff's employment on [date], that no written warning was given prior to termination, that plaintiff met all performance standards.'"
+              : formData.discoveryType === 'depositions'
+              ? "Describe the key facts, events, and circumstances you want to explore through deposition testimony. Focus on what the deponent knows about WHO was involved, WHAT happened, WHERE events occurred, WHEN they took place, and WHY decisions were made. Example: 'The deponent's knowledge of the termination decision, their role in performance evaluations, communications with HR, and the company's disciplinary policies.'"
+              : "Describe specific information or documents you need to discover. The AI will use this along with your uploaded documents to generate comprehensive discovery requests."
+          }
+          rows={5}
         />
       </div>
 
-      {/* Additional Instructions */}
+      {/* Legal Strategy and Focus - Replaces Additional Instructions */}
       <div>
         <label className="block text-sm font-medium text-discovery-dark-blue mb-2">
-          Additional Instructions for AI
+          {formData.discoveryType === 'interrogatories'
+            ? 'Legal Theory and Strategy Focus'
+            : formData.discoveryType === 'document-requests'
+            ? 'Document Search Strategy'
+            : formData.discoveryType === 'depositions'
+            ? 'Deposition Strategy and Objectives'
+            : 'Legal Strategy and Instructions'
+          }
         </label>
         <textarea
           name="additionalInstructions"
           value={formData.additionalInstructions}
           onChange={handleInputChange}
           className="discovery-textarea"
-          placeholder="Any specific instructions for the AI to consider when generating the discovery document (tone, style, specific legal standards, etc.)"
+          placeholder={
+            formData.discoveryType === 'interrogatories'
+              ? "Describe your legal theory and what you're trying to prove. What knowledge gaps do you need to fill? What admissions would help your case? Example: 'Focus on establishing a pattern of discriminatory behavior, identify decision-makers and their motivations, explore whether proper procedures were followed.'"
+              : formData.discoveryType === 'document-requests'
+              ? "What are you looking for in the documents? What patterns or evidence do you expect to find? Example: 'Look for evidence of discriminatory communications, inconsistent application of policies, or documentation showing pretext for termination.'"
+              : formData.discoveryType === 'depositions'
+              ? "What are your key objectives for this deposition? What testimony do you need to establish your case or defense? Example: 'Establish the deponent's role in the termination decision, explore their knowledge of company policies, and obtain admissions about discriminatory conduct.'"
+              : "Describe your legal strategy and any specific focus areas for the discovery requests. What are you trying to prove or establish?"
+          }
           rows={3}
         />
       </div>
